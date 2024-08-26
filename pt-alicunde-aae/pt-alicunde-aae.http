@@ -1,0 +1,6 @@
+@pt_alicunde_aae_HostAddress = http://localhost:5277
+
+GET {{pt_alicunde_aae_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
