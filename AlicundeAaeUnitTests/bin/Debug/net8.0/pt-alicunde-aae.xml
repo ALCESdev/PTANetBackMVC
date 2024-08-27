@@ -1,0 +1,137 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>pt-alicunde-aae</name>
+    </assembly>
+    <members>
+        <member name="M:BankController.FetchAndStoreBanks">
+            <summary>
+            Fetches banks from the example API and stores them in the database.
+            </summary>
+            <returns>HTTP 200 OK if successful; otherwise, HTTP 500 Internal Server Error with an error message.</returns>
+        </member>
+        <member name="M:BankController.GetAllBanks">
+            <summary>
+            Gets all banks from the database.
+            </summary>
+            <returns>A list of all banks if successful; otherwise, HTTP 500 Internal Server Error with an error message.</returns>
+        </member>
+        <member name="M:BankController.GetBankById(System.Int32)">
+            <summary>
+            Gets a specific bank by its ID.
+            </summary>
+            <param name="id">The ID of the bank to retrieve.</param>
+            <returns>The requested bank if found; otherwise, HTTP 404 Not Found or HTTP 500 Internal Server Error with an error message.</returns>
+        </member>
+        <member name="M:BankController.UpdateBank(System.Int32,pt_alicunde_aae.Entities.Bank)">
+            <summary>
+            Updates an existing bank.
+            </summary>
+            <param name="id">The ID of the bank to update.</param>
+            <param name="updatedBank">The updated bank data.</param>
+            <returns>HTTP 200 OK if successful; otherwise, HTTP 404 Not Found or HTTP 500 Internal Server Error with an error message.</returns>
+        </member>
+        <member name="M:BankController.DeleteBank(System.Int32)">
+            <summary>
+            Deletes a specific bank by its ID.
+            </summary>
+            <param name="id">The ID of the bank to delete.</param>
+            <returns>HTTP 200 OK if successful; otherwise, HTTP 404 Not Found or HTTP 500 Internal Server Error with an error message.</returns>
+        </member>
+        <member name="T:pt_alicunde_aae.Migrations.InitialCreateBd">
+            <inheritdoc />
+        </member>
+        <member name="M:pt_alicunde_aae.Migrations.InitialCreateBd.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:pt_alicunde_aae.Migrations.InitialCreateBd.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:pt_alicunde_aae.Migrations.InitialCreateBd.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:pt_alicunde_aae.Utilities.Result`1">
+            <summary>
+            Represents the result of an operation that can be either successful or failed.
+            </summary>
+            <typeparam name="T">The type of the value returned if the operation is successful.</typeparam>
+        </member>
+        <member name="M:pt_alicunde_aae.Utilities.Result`1.#ctor(`0,System.String)">
+            <summary>
+            Protected constructor to initialize a new instance of the <see cref="T:pt_alicunde_aae.Utilities.Result`1"/> class.
+            </summary>
+            <param name="value">The value resulting from the operation if it was successful.</param>
+            <param name="error">The error message if the operation failed.</param>
+        </member>
+        <member name="M:pt_alicunde_aae.Utilities.Result`1.Success(`0)">
+            <summary>
+            Creates a successful result.
+            </summary>
+            <param name="value">The value resulting from the successful operation.</param>
+            <returns>An instance of <see cref="T:pt_alicunde_aae.Utilities.Result`1"/> representing a successful result.</returns>
+        </member>
+        <member name="M:pt_alicunde_aae.Utilities.Result`1.Failure(System.String)">
+            <summary>
+            Creates a failed result.
+            </summary>
+            <param name="error">The error message describing why the operation failed.</param>
+            <returns>An instance of <see cref="T:pt_alicunde_aae.Utilities.Result`1"/> representing a failed result.</returns>
+        </member>
+        <member name="M:BankService.FetchAndStoreBanksAsync">
+            <summary>
+            Fetches and stores banks from the example API.
+            </summary>
+            <returns>
+            A <see cref="T:pt_alicunde_aae.Utilities.Result`1"/> object containing a boolean indicating whether 
+            the operation was successful. If failed, contains an error message.
+            </returns>
+        </member>
+        <member name="M:BankService.GetAllBanksAsync">
+            <summary>
+            Gets all banks from the database.
+            </summary>
+            <returns>
+            A <see cref="T:pt_alicunde_aae.Utilities.Result`1"/> object containing a list of all banks if successful.
+            If failed, contains an error message.
+            </returns>
+        </member>
+        <member name="M:BankService.GetBankByIdAsync(System.Int32)">
+            <summary>
+            Gets a specific bank by its ID.
+            </summary>
+            <param name="id">The ID of the bank to retrieve.</param>
+            <returns>
+            A <see cref="T:pt_alicunde_aae.Utilities.Result`1"/> object containing the requested bank if found.
+            If not found or failed, contains an error message.
+            </returns>
+        </member>
+        <member name="M:BankService.UpdateBankAsync(System.Int32,pt_alicunde_aae.Entities.Bank)">
+            <summary>
+            Updates an existing bank in the database.
+            </summary>
+            <param name="id">The ID of the bank to update.</param>
+            <param name="updatedBank">The updated bank data.</param>
+            <returns>
+            A <see cref="T:pt_alicunde_aae.Utilities.Result`1"/> object containing a boolean indicating whether 
+            the update was successful. If failed, contains an error message.
+            </returns>
+        </member>
+        <member name="M:BankService.DeleteBankAsync(System.Int32)">
+            <summary>
+            Deletes a specific bank from the database.
+            </summary>
+            <param name="id">The ID of the bank to delete.</param>
+            <returns>
+            A <see cref="T:pt_alicunde_aae.Utilities.Result`1"/> object containing a boolean indicating whether 
+            the deletion was successful. If failed, contains an error message.
+            </returns>
+        </member>
+        <member name="M:BankService.MapBank(pt_alicunde_aae.Entities.Bank,pt_alicunde_aae.Entities.Bank)">
+            <summary>
+            Maps the properties of the source Bank to the target Bank.
+            </summary>
+            <param name="targetBank">The bank entity to be updated.</param>
+            <param name="sourceBank">The bank entity containing updated data.</param>
+        </member>
+    </members>
+</doc>
