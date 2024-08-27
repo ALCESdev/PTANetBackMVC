@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using pt_alicunde_aae.Data;
 using pt_alicunde_aae.Entities;
+using pt_alicunde_aae.Utilities;
 
 public class BankService
 {
@@ -9,12 +10,16 @@ public class BankService
     private readonly HttpClient _httpClient;
     private readonly AppDbContext _context;
     private readonly ILogger<BankService> _logger;
+    private const string BanksApiUrl = "https://api.opendata.esett.com/EXP06/Banks";
 
     #endregion
 
     #region CONSTRUCTOR
 
-    public BankService(HttpClient httpClient, AppDbContext context, ILogger<BankService> logger)
+    public BankService(
+        HttpClient httpClient,
+        AppDbContext context,
+        ILogger<BankService> logger)
     {
         _httpClient = httpClient;
         _context = context;
@@ -26,84 +31,161 @@ public class BankService
     #region METHODS
 
     /// <summary>
-    /// Fetches and stores banks from example API.
+    /// Fetches and stores banks from the example API.
     /// </summary>
-    /// <returns>A boolean indicating whether the operation was successful or not.</returns>
-    public async Task<bool> FetchAndStoreBanksAsync()
+    /// <returns>
+    /// A <see cref="Result{T}"/> object containing a boolean indicating whether 
+    /// the operation was successful. If failed, contains an error message.
+    /// </returns>
+    public async Task<Result<bool>> FetchAndStoreBanksAsync()
     {
         try
         {
-            List<Bank>? banks = await _httpClient.GetFromJsonAsync<List<Bank>>("https://api.opendata.esett.com/EXP06/Banks");
+            List<Bank>? banksList = await _httpClient.GetFromJsonAsync<List<Bank>>(BanksApiUrl);
 
-            if (banks == null || banks.Count == 0)
+            if (banksList == null || banksList.Count == 0)
             {
                 _logger.LogWarning("No banks were returned from the API.");
-                return false;
+                return Result<bool>.Failure("No banks were returned from the API.");
             }
 
-            _context.Bank.AddRange(banks);
+            _context.Bank.AddRange(banksList);
             await _context.SaveChangesAsync();
-            return true;
+            return Result<bool>.Success(true);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred while fetching or storing banks.");
-            return false;
+            return Result<bool>.Failure("An error occurred while fetching or storing banks.");
         }
     }
 
     /// <summary>
     /// Gets all banks from the database.
     /// </summary>
-    /// <returns>A list of all banks.</returns>
-    public async Task<List<Bank>> GetAllBanksAsync() => await _context.Bank.ToListAsync();
+    /// <returns>
+    /// A <see cref="Result{T}"/> object containing a list of all banks if successful.
+    /// If failed, contains an error message.
+    /// </returns>
+    public async Task<Result<List<Bank>>> GetAllBanksAsync()
+    {
+        try
+        {
+            List<Bank>? banksList = await _context.Bank.ToListAsync();
+            return Result<List<Bank>>.Success(banksList);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving the banks.");
+            return Result<List<Bank>>.Failure("An error occurred while retrieving the banks.");
+        }
+    }
 
     /// <summary>
-    /// Gets a specific bank by its id.
+    /// Gets a specific bank by its ID.
     /// </summary>
-    /// <param name="id">The bank's id.</param>
-    /// <returns>The requested bank if found; otherwise, null.</returns>
-    public async Task<Bank?> GetBankByIdAsync(int id) => await _context.Bank.FindAsync(id);
+    /// <param name="id">The ID of the bank to retrieve.</param>
+    /// <returns>
+    /// A <see cref="Result{T}"/> object containing the requested bank if found.
+    /// If not found or failed, contains an error message.
+    /// </returns>
+    public async Task<Result<Bank?>> GetBankByIdAsync(int id)
+    {
+        try
+        {
+            Bank? bank = await _context.Bank.FindAsync(id);
+
+            if (bank == null)
+            {
+                return Result<Bank?>.Failure($"Bank with ID {id} was not found.");
+            }
+
+            return Result<Bank?>.Success(bank);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving the bank.");
+            return Result<Bank?>.Failure("An error occurred while retrieving the bank.");
+        }
+    }
 
     /// <summary>
     /// Updates an existing bank in the database.
     /// </summary>
-    /// <param name="id">The bank's id to update.</param>
+    /// <param name="id">The ID of the bank to update.</param>
     /// <param name="updatedBank">The updated bank data.</param>
-    /// <returns>A boolean indicating whether the update was successful.</returns>
-    public async Task<bool> UpdateBankAsync(int id, Bank updatedBank)
+    /// <returns>
+    /// A <see cref="Result{T}"/> object containing a boolean indicating whether 
+    /// the update was successful. If failed, contains an error message.
+    /// </returns>
+    public async Task<Result<bool>> UpdateBankAsync(int id, Bank updatedBank)
     {
-        Bank? existingBank = await _context.Bank.FindAsync(id);
-        if (existingBank == null)
+        try
         {
-            return false;
+            Bank? existingBank = await _context.Bank.FindAsync(id);
+
+            if (existingBank == null)
+            {
+                return Result<bool>.Failure($"Bank with ID {id} was not found.");
+            }
+
+            MapBank(existingBank, updatedBank);
+
+            _context.Bank.Update(existingBank);
+            await _context.SaveChangesAsync();
+            return Result<bool>.Success(true);
         }
-
-        existingBank.bic = updatedBank.bic;
-        existingBank.country = updatedBank.country;
-        existingBank.name = updatedBank.name;
-
-        _context.Bank.Update(existingBank);
-        await _context.SaveChangesAsync();
-        return true;
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while updating the bank.");
+            return Result<bool>.Failure("An error occurred while updating the bank.");
+        }
     }
 
     /// <summary>
     /// Deletes a specific bank from the database.
     /// </summary>
-    /// <param name="id">The bank's id to delete.</param>
-    /// <returns>A boolean indicating whether the deletion was successful.</returns>
-    public async Task<bool> DeleteBankAsync(int id)
+    /// <param name="id">The ID of the bank to delete.</param>
+    /// <returns>
+    /// A <see cref="Result{T}"/> object containing a boolean indicating whether 
+    /// the deletion was successful. If failed, contains an error message.
+    /// </returns>
+    public async Task<Result<bool>> DeleteBankAsync(int id)
     {
-        Bank? bank = await _context.Bank.FindAsync(id);
-        if (bank == null)
+        try
         {
-            return false;
-        }
+            Bank? bank = await _context.Bank.FindAsync(id);
 
-        _context.Bank.Remove(bank);
-        await _context.SaveChangesAsync();
-        return true;
+            if (bank == null)
+            {
+                return Result<bool>.Failure($"Bank with ID {id} was not found.");
+            }
+
+            _context.Bank.Remove(bank);
+            await _context.SaveChangesAsync();
+            return Result<bool>.Success(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while deleting the bank.");
+            return Result<bool>.Failure("An error occurred while deleting the bank.");
+        }
+    }
+
+    #endregion
+
+    #region PRIVATE METHODS
+
+    /// <summary>
+    /// Maps the properties of the source Bank to the target Bank.
+    /// </summary>
+    /// <param name="targetBank">The bank entity to be updated.</param>
+    /// <param name="sourceBank">The bank entity containing updated data.</param>
+    private void MapBank(Bank targetBank, Bank sourceBank)
+    {
+        targetBank.bic = sourceBank.bic;
+        targetBank.country = sourceBank.country;
+        targetBank.name = sourceBank.name;
     }
 
     #endregion
